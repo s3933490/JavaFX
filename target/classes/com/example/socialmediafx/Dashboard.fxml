@@ -38,12 +38,19 @@
                          <Label text="Main Post ID:" translateY="-60.0" />
                          <TextField fx:id="mainPostIdTextField" maxWidth="-Infinity" prefHeight="38.0" prefWidth="286.0" translateY="-60.0" />
                          <Button onAction="#createNewPost" text="Add Post" translateY="-60.0" />
-                         <Button fx:id="exportPostButton" text="Export Post" onAction="#exportPost" />
                      </VBox>
                 </Tab>
                  <Tab fx:id="retrievePostTab" text="Retrieve Post">
-                        <!-- Add content for Retrieve Post tab -->
-                    </Tab>
+                     <VBox alignment="CENTER" spacing="20">
+                         <Label text="Enter Post ID:" />
+                         <TextField fx:id="postIdTextField" />
+                         <Button text="Retrieve Post" onAction="#retrievePost" />
+                         <TextArea fx:id="retrievedPostTextArea" prefWidth="400" prefHeight="200" editable="false" />
+                         <Label text="Enter File Name to Export:" />
+                         <TextField fx:id="exportFileName" />
+                         <Button fx:id="exportPostButton" text="Export Post" onAction="#exportPost" />
+                     </VBox>
+                 </Tab>
                  <!-- Add more tabs for other functionalities -->
              </tabs>
          </TabPane>

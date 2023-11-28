@@ -3,10 +3,7 @@ package com.example.socialmediafx;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.text.ParseException;
@@ -16,6 +13,7 @@ import java.util.regex.Pattern;
 
 public class DashboardScreenController {
 
+    public TextField exportFileName;
     PostManager postManager = new PostManager();
 
     @FXML
@@ -23,6 +21,12 @@ public class DashboardScreenController {
 
     @FXML
     private TextField firstNameTextField;
+
+    @FXML
+    private Button retrievePostButton;
+
+    @FXML
+    private TextArea retrievedPostTextArea;
 
     @FXML
     private TextField lastNameTextField;
@@ -65,9 +69,6 @@ public class DashboardScreenController {
     private Button addPostButton;
 
     @FXML
-    private Button retrievePostButton;
-
-    @FXML
     private Button retrieveRepliesButton;
 
     @FXML
@@ -92,6 +93,7 @@ public class DashboardScreenController {
         UserManager userManager = new UserManager();
         String username = userManager.getCurrentUser().getUsername();
         welcomeLabel.setText("Welcome " + username);
+        postManager.readDataFromCSV("posts.csv");
     }
 
     @FXML
@@ -133,13 +135,11 @@ public class DashboardScreenController {
             error = true; // Content or author is blank
         }
 
-        // Automatically assign a unique ID based on the position in the array
-        int postId = postManager.getPosts().size();
-
         // Create a new Post object
         if (error == false) {
+            int postId = postManager.posts.size();
             SocialMediaPost newPost = new SocialMediaPost(postId, content, UserManager.getCurrentUser().getUsername(), likes, shares, dateTime, mainPostId);
-            postManager.addPost(newPost);
+            postManager.addPost(newPost, true);
             return newPost;
         } else {
             return null;
@@ -171,7 +171,7 @@ public class DashboardScreenController {
         return dateTime;
     }
 
-    private void showAlert(String message) {
+    public void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Input Error");
         alert.setHeaderText(null);
@@ -181,20 +181,43 @@ public class DashboardScreenController {
 
     @FXML
     private void exportPost(ActionEvent event) {
-        // Get the selected post ID (you need to implement this part)
-//        int postId = getSelectedPostId();
+        try {
+            int postId = Integer.parseInt(postIdTextField.getText());
 
-        // Call the exportPostToCSV method from SocialMediaManager
-        PostManager postManager = new PostManager();
-        postManager.exportPostToCSV(0, (Stage) ((Node) event.getSource()).getScene().getWindow());
+            // Call the exportPostToCSV method from SocialMediaManage
+            String fileName = exportFileName.getText();
+            PostManager postManager = new PostManager();
+            postManager.exportPostToCSV(fileName, postId, (Stage) ((Node) event.getSource()).getScene().getWindow());
+        } catch (NumberFormatException e) {
+            showAlert("Post not found. Please try a different post ID");
+        }
     }
 
-//    // You need to implement a method to get the selected post ID
-//    private int getSelectedPostId() {
-//        // Implement this method based on your UI, e.g., retrieve from a TableView or other UI components
-//        return 1; // Replace with the actual selected post ID
-//    }
+    @FXML
+    private void retrievePost() {
+        try {
+            int postId = Integer.parseInt(postIdTextField.getText());
+            try {
+            SocialMediaPost post = postManager.posts.get(postId);
+                    // Display the retrieved post
+                    retrievedPostTextArea.setText(formatPostDetails(post));
+                } catch (RuntimeException e) {
+                showAlert("Post not found");
+            }
+        } catch (NumberFormatException e) {
+            showAlert("Please enter a valid Post ID.");
+        }
+    }
 
+    private String formatPostDetails(SocialMediaPost post) {
+        // Customize the formatting of the retrieved post details
+        return "ID: " + post.getId() +
+                "\nAuthor: " + post.getAuthor() +
+                "\nContent: " + post.getContent() +
+                "\nLikes: " + post.getLikes() +
+                "\nShares: " + post.getShares() +
+                "\nDate-Time: " + post.getDateTime();
+    }
 
     private boolean isValidDateTime(String dateTime) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");

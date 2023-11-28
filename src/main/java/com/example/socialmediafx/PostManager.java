@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class PostManager {
-    private ObservableList<SocialMediaPost> posts;
+    public ObservableList<SocialMediaPost> posts;
     private static final String POSTS_FILE_PATH = "posts.csv";
 
     public PostManager() {
@@ -23,40 +23,43 @@ public class PostManager {
 
 
 
-    public void exportPostToCSV(int postId, Stage primaryStage) {
-        readDataFromCSV("posts.csv");
-        SocialMediaPost postToExport = posts.get(postId);
-        System.out.println(postId);
-        System.out.println(postToExport);
+    public void exportPostToCSV(String fileName, int postId, Stage primaryStage) {
+        try {
+            readDataFromCSV("posts.csv");
+            SocialMediaPost postToExport = posts.get(postId);
 
-        if (postToExport != null) {
-            DirectoryChooser directoryChooser = new DirectoryChooser();
-            File selectedDirectory = directoryChooser.showDialog(primaryStage);
+            if (postToExport != null) {
+                DirectoryChooser directoryChooser = new DirectoryChooser();
+                File selectedDirectory = directoryChooser.showDialog(primaryStage);
 
-            if (selectedDirectory != null) {
-                String folderPath = selectedDirectory.getAbsolutePath();
-                String fileName = "exported_post";
+                if (selectedDirectory != null) {
+                    String folderPath = selectedDirectory.getAbsolutePath();
 
-                String filePath = folderPath + "/" + fileName + ".csv";
+                    String filePath = folderPath + "/" + fileName + ".csv";
 
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-                    // Write header
-                    writer.write("ID,content,author,likes,shares,date-time,main_post_id");
-                    writer.newLine();
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+                        // Write header
+                        writer.write("ID,content,author,likes,shares,date-time,main_post_id");
+                        writer.newLine();
 
-                    // Write the post
-                    writer.write(postToExport.toCSVString());
-                    writer.newLine();
+                        // Write the post
+                        writer.write(postToExport.toCSVString());
+                        writer.newLine();
 
-                    System.out.println("Post exported to file successfully: " + filePath);
-                } catch (IOException e) {
-                    System.err.println("Error exporting post to file: " + e.getMessage());
+                        showAlert("Post exported to file successfully: " + filePath);
+                    } catch (IOException e) {
+                        System.err.println("Error exporting post to file: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("Export canceled by user.");
                 }
             } else {
-                System.out.println("Export canceled by user.");
+                System.out.println("Post not found.");
             }
-        } else {
-            System.out.println("Post not found.");
+        } catch (IndexOutOfBoundsException e) {
+            DashboardScreenController dashboard = new DashboardScreenController();
+            dashboard.showAlert("Post not found");
+
         }
     }
 
@@ -86,10 +89,12 @@ public class PostManager {
         alert.showAndWait();
     }
 
-    public void addPost(SocialMediaPost post) {
+    public void addPost(SocialMediaPost post, boolean alert) {
         posts.add(post);
         savePostsToFile();
-        showAlert("Post added successfully with ID " + post.getId() + "!" );
+        if (alert) {
+            showAlert("Post added successfully with ID " + post.getId() + "!");
+        }
     }
 
 
@@ -145,12 +150,6 @@ public class PostManager {
         return topN;
     }
 
-    public void addSocialMediaPost() {
-        // Create a new Post object and add it to the collection in SocialMediaManager
-        SocialMediaPost newPost = createNewPost();
-        addPost(newPost);
-    }
-
 
 
 
@@ -161,7 +160,7 @@ public class PostManager {
 
         if (retrievedPost != null) {
             // Display the retrieved post
-            printSocialMediaPost(retrievedPost);
+//            printSocialMediaPost(retrievedPost);
         } else {
             System.out.println("Post not found.");
         }
@@ -179,7 +178,7 @@ public class PostManager {
             System.out.println("Replies for Post ID " + postIdToRetrieveRepliesFor + ":");
             for (SocialMediaPost reply : replies) {
                 // Display each reply
-                printSocialMediaPost(reply);
+//                printSocialMediaPost(reply);
             }
         }
     }
@@ -209,87 +208,6 @@ public class PostManager {
     }
 
 
-    public SocialMediaPost createNewPost() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Enter the content of the post: ");
-        String content = scanner.nextLine();
-
-        System.out.print("Enter the author's anonymous ID: ");
-        String author = scanner.nextLine();
-
-        int likes = -1;
-        while (likes < 0) {
-            System.out.print("Enter the number of likes (non-negative integer): ");
-            if (scanner.hasNextInt()) {
-                likes = scanner.nextInt();
-                if (likes < 0) {
-                    System.out.println("Likes must be a non-negative integer.");
-                }
-            } else {
-                System.out.println("Please enter a valid non-negative integer for likes.");
-                scanner.next(); // Consume the invalid input
-            }
-        }
-
-        int shares = -1;
-        while (shares < 0) {
-            System.out.print("Enter the number of shares (non-negative integer): ");
-            if (scanner.hasNextInt()) {
-                shares = scanner.nextInt();
-                if (shares < 0) {
-                    System.out.println("Shares must be a non-negative integer.");
-                }
-            } else {
-                System.out.println("Please enter a valid non-negative integer for shares.");
-                scanner.next(); // Consume the invalid input
-            }
-        }
-
-        scanner.nextLine(); // Consume the newline character
-
-        String dateTime = "";
-        Pattern dateTimePattern = Pattern.compile("^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}$");
-        while (dateTime.isEmpty() || !dateTimePattern.matcher(dateTime).matches() || !isValidDateTime(dateTime)) {
-            System.out.print("Enter the date and time (DD/MM/YYYY HH:MM): ");
-            dateTime = scanner.nextLine();
-            if (!dateTimePattern.matcher(dateTime).matches() || !isValidDateTime(dateTime)) {
-                System.out.println("Invalid date and time format or values. Please use DD/MM/YYYY HH:MM.");
-            }
-        }
-
-        int mainPostId = -1;
-        while (mainPostId < 0) {
-            System.out.print("Enter the main post ID (0 if not a reply): ");
-            if (scanner.hasNextInt()) {
-                mainPostId = scanner.nextInt();
-                if (mainPostId < 0) {
-                    System.out.println("Main Post ID must be a non-negative integer.");
-                }
-            } else {
-                System.out.println("Please enter a valid non-negative integer for Main Post ID.");
-                scanner.next(); // Consume the invalid input
-            }
-        }
-
-        // Create a new Post object
-        SocialMediaPost newPost = new SocialMediaPost(0, content, author, likes, shares, dateTime, mainPostId);
-
-        return newPost;
-    }
-
-    public boolean isValidDateTime(String dateTime) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        sdf.setLenient(false); // Disallow lenient parsing
-        try {
-            Date date = sdf.parse(dateTime);
-            // Check if the parsed date is not null and is valid
-            return date != null;
-        } catch (ParseException e) {
-            // Parsing error, not a valid date and time
-            return false;
-        }
-    }
 
     // Retrieve the top N posts (and replies) with the most likes
     public List<SocialMediaPost> getTopLikedPosts(int n) {
@@ -297,15 +215,6 @@ public class PostManager {
         return posts.subList(0, Math.min(n, posts.size()));
     }
 
-    public void printSocialMediaPost(SocialMediaPost post) {
-        System.out.println("Retrieved Social Media Post:");
-        System.out.println("ID: " + post.getId());
-        System.out.println("Author: " + post.getAuthor());
-        System.out.println("Content: " + post.getContent());
-        System.out.println("Likes: " + post.getLikes());
-        System.out.println("Shares: " + post.getShares());
-        System.out.println("Date-Time: " + post.getDateTime());
-    }
 
     public void readDataFromCSV(String filename) {
         try (BufferedReader reader = new BufferedReader(new FileReader("posts.csv"))) {
@@ -330,7 +239,7 @@ public class PostManager {
 
                     // Create a Post object and add it to your collection
                     SocialMediaPost post = new SocialMediaPost(id, content, author, likes, shares, dateTime, mainPostId);
-                    addPost(post);
+                    addPost(post, false);
                 } else {
                     // Handle incomplete or malformed lines
                     System.err.println("Malformed line in CSV: " + line);
