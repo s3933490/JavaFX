@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane fx:id="AnchorPane" prefHeight="800.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.socialmediafx.DashboardScreenController">
+    <children>
+        <VBox alignment="CENTER" layoutX="200.0" layoutY="70.0" spacing="20.0" />
+         <TabPane fx:id="tabPane" layoutY="-2.0" prefHeight="800.0" prefWidth="1000.0">
+             <tabs>
+                 <Tab fx:id="homeTab" text="Home">
+                     <content>
+                         <VBox alignment="CENTER" spacing="20.0">
+                             <!-- Content specific to Home tab -->
+                             <Label fx:id="welcomeLabel" alignment="CENTER" contentDisplay="TOP" prefHeight="194.0" prefWidth="527.0" text="Welcome Username" textAlignment="CENTER">
+                                 <font>
+                                     <Font name="Roboto Light" size="54.0" />
+                                 </font>
+                             </Label>
+                             <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#logout" prefHeight="56.0" prefWidth="114.0" text="Logout" />
+                         </VBox>
+                     </content>
+                 </Tab>
+                 <Tab fx:id="editProfileTab" text="Edit Profile">
+                        <!-- Add content for Edit Profile tab -->
+                    </Tab>
+                 <Tab fx:id="addPostTab" text="Add Post">
+                     <VBox alignment="CENTER" layoutX="2.0" layoutY="28.0" prefHeight="549.0" prefWidth="786.0" spacing="20.0">
+                         <Label text="Content:" translateY="-55.0" />
+                         <TextField fx:id="contentTextField" maxWidth="-Infinity" prefHeight="85.0" prefWidth="544.0" translateY="-60.0" />
+                         <Label text="Likes:" translateY="-60.0" />
+                         <TextField fx:id="likesTextField" maxWidth="-Infinity" prefHeight="38.0" prefWidth="286.0" translateY="-60.0" />
+                         <Label text="Shares:" translateY="-60.0" />
+                         <TextField fx:id="sharesTextField" maxWidth="-Infinity" prefHeight="38.0" prefWidth="286.0" translateY="-60.0" />
+                         <Label text="Date-Time (DD/MM/YYYY HH:MM):" translateY="-60.0" />
+                         <TextField fx:id="dateTimeTextField" maxWidth="-Infinity" prefHeight="38.0" prefWidth="286.0" translateY="-60.0" />
+                         <Label text="Main Post ID:" translateY="-60.0" />
+                         <TextField fx:id="mainPostIdTextField" maxWidth="-Infinity" prefHeight="38.0" prefWidth="286.0" translateY="-60.0" />
+                         <Button onAction="#createNewPost" text="Add Post" translateY="-60.0" />
+                         <Button fx:id="exportPostButton" text="Export Post" onAction="#exportPost" />
+                     </VBox>
+                </Tab>
+                 <Tab fx:id="retrievePostTab" text="Retrieve Post">
+                        <!-- Add content for Retrieve Post tab -->
+                    </Tab>
+                 <!-- Add more tabs for other functionalities -->
+             </tabs>
+         </TabPane>
+
+
+    </children>
+</AnchorPane>
